@@ -6,7 +6,7 @@ My repo for deep learning.
 - Computer Vision
 - Books
 - Notes
-
+- Projects
 
 made by **smruti**
 
