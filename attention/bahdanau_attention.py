@@ -38,7 +38,7 @@ class bahdanau_Attention(nn.Module):
         self.a = self.softmax(self.e)  # batch_size, seq_len
         # for context we add a dim to the attention score it can broadcast over the encoder_dim and we can do the element wise mul ad get batch_size,seq_len,encoder_hidden_size
         # because we are adding dim at the end and adding over the seq_len dim so we get:
-        self.context = torch.sum(self.a.unsqueeze(-1) * keys, dim=1)  # batch_size, encoder_hidden_size
+        self.context = torch.bmm(self.a.unsqueeze(1), keys).squeeze(1)  # batch_size, encoder_hidden_size
         return self.context
 
 class Decoder(nn.Module):
