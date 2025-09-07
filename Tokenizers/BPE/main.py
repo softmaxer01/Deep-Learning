@@ -1,10 +1,10 @@
-from bpt import BPT
+from bpe import BPE
 
 with open("/home/smruti/Desktop/git repos/Deep-Learning/Tokenizers/BPT/input.txt","r") as r:
   text = r.read()
 
 
-bpt = BPT(text,270)
+bpt = BPE(text,270)
 
 val_text = "hello i am smruti, i am an undergrad math student at nit-rkl..."
 
