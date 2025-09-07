@@ -1,0 +1,8 @@
+torch>=2.0.0
+torchmetrics>=0.11.0
+datasets>=2.14.0
+tokenizers>=0.13.0
+tqdm>=4.65.0
+tensorboard>=2.13.0
+numpy>=1.24.0
+pathlib2>=2.3.7

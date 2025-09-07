@@ -166,9 +166,7 @@ class Projection_layer(nn.Module):
         # Softmax is typically applied during loss calculation or inference
         return self.linear(x)
 
-def create_causal_mask(seq_len):
-    mask = torch.tril(torch.ones(seq_len, seq_len))
-    return mask.unsqueeze(0).unsqueeze(0) 
+# Causal mask function moved to dataset.py to avoid duplication 
 
 class Transformer(nn.Module):
     def __init__(self, encoder: Encoder, decoder: Decoder, src_emb: InputEmbedding, 
