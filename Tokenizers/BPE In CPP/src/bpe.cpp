@@ -10,6 +10,7 @@ bpe::bpe(vector<int> input_tokens, int num_vocab)
 {
     tokens = input_tokens;
     this->num_vocab = num_vocab;
+    this->itr = num_vocab - 256;
 }
 
 // getting the stats of biagrams
@@ -56,5 +57,13 @@ vector<int> bpe::merge_(std::pair<int,int> pairs,int idx){
     return new_tokens;
 }
 
-
-
+// build merge-table.
+void bpe::build_merge_table(){
+    for(int i = 0; i<itr;i++){
+        vector<pair<pair<int,int>, int>> stats = get_stats_sorted();
+        std::pair<int,int> p =  std::make_pair(stats[0].first.first,stats[0].first.second);
+        int idx = 256+i;
+        vector<int> new_tokens = merge_(p,idx);
+        merge_table[p] = idx;
+    }
+}

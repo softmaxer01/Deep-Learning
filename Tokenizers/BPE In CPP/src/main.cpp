@@ -5,21 +5,24 @@
 using namespace std;
 
 int main() {
-    filereading f("/home/smruti/Desktop/git repos/Deep-Learning/Tokenizers/BPE In CPP/src/test.txt");
+    filereading f("/home/smruti/Desktop/git repos/Deep-Learning/Tokenizers/BPE In CPP/src/input.txt");
     vector<int> bytes = f.get_bytes();
     // for(int i = 0;i<100;i++){
     //     cout<<static_cast<char> (bytes[i]);
     // }
     // cout<<endl;
     cout<<f.num_chars()<<endl;
-    bpe b(bytes,10);
+    
+    bpe b(bytes,266);
     vector<pair<pair<int,int>, int>> sorted_stats = b.get_stats_sorted();
-    std::pair<int,int> pairs = make_pair(115,116);
-    vector<int> new_tokens = b.merge_(pairs,257);
-    for(auto & it: new_tokens){
-        cout<<it<<" ";
+    for(auto &it: sorted_stats){
+        cout<<"("<<it.first.first<<","<<it.first.second<<")"<<"--"<<it.second<<endl;    
+        break;
     }
-    cout<<endl;
+    b.build_merge_table();
+    for (auto & it: b.merge_table){
+        cout<<"("<<it.first.first<<","<<it.first.second<<")"<<"--"<<it.second<<endl;
+    }
 
     return 0;
 }
