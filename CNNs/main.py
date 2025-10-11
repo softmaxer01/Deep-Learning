@@ -97,4 +97,3 @@ metrices = l.training_loop(train_loader=train_loader,val_loader=val_loader)
 plot_metrics(metrics=metrices)
 
 # inference
-show_images_with_predictions(model, val_dataset, num_images=5)
