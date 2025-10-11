@@ -2,32 +2,57 @@ import torch
 import torch.nn as nn 
 import torchvision
 import torch.optim as optim
-from model import LeNet
+import Models as md
 from training import LOOPS
 from plotting import plot_metrics
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from inference import show_images_with_predictions
 
+'''for MNIST''' 
+
+# transform = transforms.Compose([
+#     transforms.ToTensor(),
+#     transforms.Normalize((0.5,), (0.5,))
+# ])
+
+
+# train_dataset = torchvision.datasets.MNIST(
+#     root='./data',
+#     train=True,
+#     download=True,
+#     transform=transform
+# )
+
+# val_dataset = torchvision.datasets.MNIST(
+#     root='./data',
+#     train=False,
+#     download=True,
+#     transform=transform
+# )
+
+''' CIFAR-10 ''' 
+# Standard CIFAR-10 normalization values
 transform = transforms.Compose([
+    transforms.Resize(224),
     transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
 ])
 
-
-train_dataset = torchvision.datasets.MNIST(
+train_dataset = torchvision.datasets.CIFAR10(
     root='./data',
     train=True,
     download=True,
     transform=transform
 )
 
-val_dataset = torchvision.datasets.MNIST(
+val_dataset = torchvision.datasets.CIFAR10(
     root='./data',
     train=False,
     download=True,
     transform=transform
 )
+
 
 batch_size = 64
 
@@ -44,8 +69,10 @@ val_loader = DataLoader(
     shuffle=False,
     num_workers=2
 )
+
+
 # model:
-model = LeNet(num_channels=1)
+model = md.AlexNet()
 
 # loss funtion
 loss_fn = nn.CrossEntropyLoss()
@@ -54,7 +81,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(),lr= 0.001)
 
 # epochs
-eps = 10
+eps = 1
 
 # device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

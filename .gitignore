@@ -2,3 +2,12 @@ pass.txt
 
 .venv
 
+# Dataset files
+CNNs/data/
+*.tar.gz
+*.gz
+**/data_batch_*
+**/test_batch
+**/*-ubyte
+**/*-ubyte.gz
+
