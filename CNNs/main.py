@@ -8,6 +8,7 @@ from plotting import plot_metrics
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from inference import show_images_with_predictions
+from model_arch import model_archs
 
 '''for MNIST''' 
 
@@ -70,9 +71,12 @@ val_loader = DataLoader(
     num_workers=2
 )
 
+arch = model_archs.inception_model_arch()
+conv_block = arch["inception_net"]
+linear_block = arch["linear_layers"]
 
 # model:
-model = md.AlexNet()
+model = md.GoogleNet(conv_block,linear_block)
 
 # loss funtion
 loss_fn = nn.CrossEntropyLoss()
