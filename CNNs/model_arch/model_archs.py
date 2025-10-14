@@ -146,3 +146,26 @@ def inception_model_arch():
             (512,10)
         ]
     }
+
+
+def resnet18():
+    return {
+        "initial": [
+            (3, 64, 7, 2, 3), 
+            "M"
+        ],
+        "conv": [
+            # (in_channels, out_channels, kernel_size, num_blocks, stride, padding)
+            (64, 64, 3, 2, 1, 1),
+            (64, 128, 3, 2, 2, 1),
+            (128, 256, 3, 2, 2, 1),
+            (256, 512, 3, 2, 2, 1)
+        ],
+        "fc": [
+            "A",  
+            "F", 
+            (512, 20),
+            "R",
+            (20, 10)
+        ]
+    }
