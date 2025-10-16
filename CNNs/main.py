@@ -32,72 +32,72 @@ from model_arch import model_archs
 #     transform=transform
 # )
 
-''' CIFAR-10 ''' 
-# Standard CIFAR-10 normalization values
-transform = transforms.Compose([
-    transforms.Resize(224),
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
-])
+# ''' CIFAR-10 ''' 
+# # Standard CIFAR-10 normalization values
+# transform = transforms.Compose([
+#     transforms.Resize(224),
+#     transforms.ToTensor(),
+#     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
+# ])
 
-train_dataset = torchvision.datasets.CIFAR10(
-    root='./data',
-    train=True,
-    download=True,
-    transform=transform
-)
+# train_dataset = torchvision.datasets.CIFAR10(
+#     root='./data',
+#     train=True,
+#     download=True,
+#     transform=transform
+# )
 
-val_dataset = torchvision.datasets.CIFAR10(
-    root='./data',
-    train=False,
-    download=True,
-    transform=transform
-)
+# val_dataset = torchvision.datasets.CIFAR10(
+#     root='./data',
+#     train=False,
+#     download=True,
+#     transform=transform
+# )
 
 
-batch_size = 64
+# batch_size = 64
 
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    shuffle=True,
-    num_workers=2
-)
+# train_loader = DataLoader(
+#     train_dataset,
+#     batch_size=batch_size,
+#     shuffle=True,
+#     num_workers=2
+# )
 
-val_loader = DataLoader(
-    val_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    num_workers=2
-)
+# val_loader = DataLoader(
+#     val_dataset,
+#     batch_size=batch_size,
+#     shuffle=False,
+#     num_workers=2
+# )
 
-arch = model_archs.inception_model_arch()
-conv_block = arch["inception_net"]
-linear_block = arch["linear_layers"]
+arch = model_archs.resnet18()
 
 # model:
-model = md.GoogleNet(conv_block,linear_block)
+model = md.ResNet(arch)
 
-# loss funtion
-loss_fn = nn.CrossEntropyLoss()
+total_params = sum(param.numel() for param in model.parameters())
+print(f"Total number of parameters: {total_params}")
+# # loss funtion
+# loss_fn = nn.CrossEntropyLoss()
 
-# optimizer
-optimizer = optim.Adam(model.parameters(),lr= 0.001)
+# # optimizer
+# optimizer = optim.Adam(model.parameters(),lr= 0.001)
 
-# epochs
-eps = 1
+# # epochs
+# eps = 1
 
-# device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
+# # device
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print(f"Using device: {device}")
 
-# training loop
-l = LOOPS(model=model,loss_fn=loss_fn,optimizer=optimizer,eps=eps,device=device)
+# # training loop
+# l = LOOPS(model=model,loss_fn=loss_fn,optimizer=optimizer,eps=eps,device=device)
 
 
-metrices = l.training_loop(train_loader=train_loader,val_loader=val_loader)
+# metrices = l.training_loop(train_loader=train_loader,val_loader=val_loader)
 
-# plotting
-plot_metrics(metrics=metrices)
+# # plotting
+# plot_metrics(metrics=metrices)
 
 # inference
