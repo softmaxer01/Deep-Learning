@@ -1,7 +1,7 @@
 pass.txt
 
 .venv
-
+.ipynb_checkpoints
 # Dataset files
 CNNs/data/
 *.tar.gz
