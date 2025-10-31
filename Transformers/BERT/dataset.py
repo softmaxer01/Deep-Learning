@@ -21,6 +21,7 @@ class BertDataset(Dataset):
             max_length = self.config.max_length,
             padding = "max_length",
             truncation = True,
+            add_special_tokens = True,  
             return_tensors = 'pt'
         )
 
@@ -32,7 +33,16 @@ def bert_mlm(tokens, tokenizer, mask_prob=0.8, replace_prob=0.1):
     device = tokens.device
     
     labels = tokens.clone()
-    selected = torch.rand(batch_size, seq_len, device=device) < 0.15 
+    
+    special_tokens_mask = (
+        (tokens == tokenizer.cls_token_id) | 
+        (tokens == tokenizer.sep_token_id) | 
+        (tokens == tokenizer.pad_token_id)
+    )
+    
+    selected = torch.rand(batch_size, seq_len, device=device) < 0.15
+    selected = selected & ~special_tokens_mask
+    
     augmented_tokens = tokens.clone()    
     rand_vals = torch.rand(batch_size, seq_len, device=device)
     
@@ -43,6 +53,7 @@ def bert_mlm(tokens, tokenizer, mask_prob=0.8, replace_prob=0.1):
     num_replacements = int(replace_positions.sum().item())
     if num_replacements > 0:
         augmented_tokens[replace_positions] = torch.randint(0, tokenizer.vocab_size, (num_replacements,), device=device)
+    
     labels[~selected] = -100
     
     return augmented_tokens, labels

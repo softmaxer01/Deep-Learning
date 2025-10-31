@@ -4,7 +4,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from config import BertConfig, BertDatasetconfig
 from dataset import BertDataset,bert_mlm
-from model import Encoder
+from model import BertForMaskedLM
 from transformers import AutoTokenizer
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
@@ -29,17 +29,14 @@ val_loader = DataLoader(val_data,batch_size=32,num_workers=2)
 test_loader = DataLoader(test_data,batch_size=32,num_workers=2)
 
 model_config.vocab_size = tokenizer.vocab_size
-model = Encoder(model_config)
-
-lm_head = nn.Linear(model_config.d_model,model_config.vocab_size)
+model = BertForMaskedLM(model_config)
 
 device = model_config.device
 model = model.to(device)
-lm_head = lm_head.to(device)
 
 
 optimizer = optim.AdamW(
-    list(model.parameters()) + list(lm_head.parameters()),
+    model.parameters(),
     lr=5e-5,
     weight_decay=0.01
 )
@@ -53,10 +50,9 @@ scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cosine_schedul
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
 
-def validate(model, lm_head, val_loader, loss_fn):
+def validate(model, val_loader, loss_fn):
     """Validation function to evaluate model on validation set"""
     model.eval()
-    lm_head.eval()
     
     total_val_loss = 0
     num_batches = 0
@@ -67,8 +63,7 @@ def validate(model, lm_head, val_loader, loss_fn):
             
             masked_tokens, labels = bert_mlm(tokens, tokenizer)
             
-            enc_out = model(masked_tokens)
-            logits = lm_head(enc_out)
+            logits = model(masked_tokens)
             
             loss = loss_fn(logits.view(-1, model_config.vocab_size), labels.view(-1))
             total_val_loss += loss.item()
@@ -78,7 +73,7 @@ def validate(model, lm_head, val_loader, loss_fn):
     return avg_val_loss
 
 
-def train(model, lm_head, train_loader, val_loader, optimizer, scheduler, loss_fn, eps):
+def train(model, train_loader, val_loader, optimizer, scheduler, loss_fn, eps):
     # Lists to store losses for each batch
     train_losses_per_batch = []
     val_losses_per_epoch = []
@@ -87,7 +82,6 @@ def train(model, lm_head, train_loader, val_loader, optimizer, scheduler, loss_f
     
     for ep in range(eps):
         model.train()
-        lm_head.train()
         epoch_train_loss = 0
         
         for batch_idx, tokens in enumerate(train_loader):
@@ -95,12 +89,11 @@ def train(model, lm_head, train_loader, val_loader, optimizer, scheduler, loss_f
 
             masked_tokens, labels = bert_mlm(tokens, tokenizer)
             optimizer.zero_grad()
-            enc_out = model(masked_tokens)
-            logits = lm_head(enc_out)
+            logits = model(masked_tokens)
 
             loss = loss_fn(logits.view(-1, model_config.vocab_size), labels.view(-1))
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(list(model.parameters()) + list(lm_head.parameters()), 1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             scheduler.step()  
             
@@ -115,7 +108,7 @@ def train(model, lm_head, train_loader, val_loader, optimizer, scheduler, loss_f
         
         avg_epoch_train_loss = epoch_train_loss / len(train_loader)
         
-        avg_val_loss = validate(model, lm_head, val_loader, loss_fn)
+        avg_val_loss = validate(model, val_loader, loss_fn)
         val_losses_per_epoch.append(avg_val_loss)
         
         print(f'Epoch {ep+1} completed. Avg Train Loss: {avg_epoch_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}')
@@ -124,4 +117,4 @@ def train(model, lm_head, train_loader, val_loader, optimizer, scheduler, loss_f
     return train_losses_per_batch, val_losses_per_epoch
 
 
-train_losses_per_batch, val_losses_per_epoch = train(model, lm_head, train_loader, val_loader, optimizer, scheduler, criterion, eps=3)
+train_losses_per_batch, val_losses_per_epoch = train(model, train_loader, val_loader, optimizer, scheduler, criterion, eps=3)
