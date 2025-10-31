@@ -33,11 +33,11 @@ class Momentum(Optimizer):
         self.beta = beta
         self.vt_prev = [torch.zeros_like(p.data) for p in self.params]
 
-    
     def step(self):
         with torch.no_grad():
-            for i,param in enumerate(self.params):
+            for i, param in enumerate(self.params):
                 if param.grad is not None:
-                    self.vt_prev[i] = self.beta*self.vt_prev[i]+(1-self.beta)*param.grad
-                    param -= self.lr*self.vt_prev[i]
+                    self.vt_prev[i] = self.beta*self.vt_prev[i] + param.grad
+                    param.data -= self.lr*self.vt_prev[i]
+
                     
