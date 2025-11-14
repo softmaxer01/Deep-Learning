@@ -58,12 +58,13 @@ def validate(model, val_loader, loss_fn):
     num_batches = 0
     
     with torch.no_grad():
-        for tokens in val_loader:
-            tokens = tokens.to(device)
+        for batch in val_loader:
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
             
-            masked_tokens, labels = bert_mlm(tokens, tokenizer)
+            masked_tokens, labels = bert_mlm(input_ids, attention_mask, tokenizer)
             
-            logits = model(masked_tokens)
+            logits = model(masked_tokens, attention_mask=attention_mask)
             
             loss = loss_fn(logits.view(-1, model_config.vocab_size), labels.view(-1))
             total_val_loss += loss.item()
@@ -84,12 +85,13 @@ def train(model, train_loader, val_loader, optimizer, scheduler, loss_fn, eps):
         model.train()
         epoch_train_loss = 0
         
-        for batch_idx, tokens in enumerate(train_loader):
-            tokens = tokens.to(device)
+        for batch_idx, batch in enumerate(train_loader):
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
 
-            masked_tokens, labels = bert_mlm(tokens, tokenizer)
+            masked_tokens, labels = bert_mlm(input_ids, attention_mask, tokenizer)
             optimizer.zero_grad()
-            logits = model(masked_tokens)
+            logits = model(masked_tokens, attention_mask=attention_mask)
 
             loss = loss_fn(logits.view(-1, model_config.vocab_size), labels.view(-1))
             loss.backward()
