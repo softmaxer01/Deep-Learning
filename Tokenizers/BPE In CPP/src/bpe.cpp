@@ -17,6 +17,9 @@ bpe::bpe(vector<int> input_tokens, int num_vocab)
 map<pair<int,int>, int> bpe::get_stats()
 {
     map<pair<int,int>, int> counts;
+    if (tokens.size() < 2) {
+        return counts; // Return empty map if not enough tokens for pairs
+    }
     for(size_t i = 0; i < tokens.size() - 1; i++) {
         pair<int,int> bigram = make_pair(tokens[i], tokens[i+1]);
         counts[bigram]++;
@@ -61,6 +64,10 @@ vector<int> bpe::merge_(std::pair<int,int> pairs,int idx){
 void bpe::build_merge_table(){
     for(int i = 0; i<itr;i++){
         vector<pair<pair<int,int>, int>> stats = get_stats_sorted();
+        if(stats.empty()) {
+            // No more pairs to merge, stop early
+            break;
+        }
         std::pair<int,int> p =  std::make_pair(stats[0].first.first,stats[0].first.second);
         int idx = 256+i;
         vector<int> new_tokens = merge_(p,idx);
